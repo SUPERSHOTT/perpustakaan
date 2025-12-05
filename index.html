@@ -1,440 +1,741 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistem Perpustakaan V4 (Schema Matched)</title>
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --bg: #f4f6f7;
-            --text: #333;
-            --sidebar-width: 260px;
+      :root {
+        --primary: #2c3e50;
+        --accent: #3498db;
+        --bg: #f4f6f7;
+        --text: #333;
+        --sidebar-width: 260px;
+      }
+      * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        display: flex;
+        height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .sidebar {
+        width: var(--sidebar-width);
+        background: var(--primary);
+        color: white;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      .sidebar h2 {
+        margin-bottom: 30px;
+        font-size: 1.4rem;
+        border-bottom: 1px solid #ffffff30;
+        padding-bottom: 10px;
+      }
+      .nav-item {
+        padding: 12px;
+        margin: 5px 0;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: 0.2s;
+      }
+      .nav-item:hover,
+      .nav-item.active {
+        background: var(--accent);
+      }
+
+      .main {
+        flex: 1;
+        padding: 30px;
+        overflow-y: auto;
+      }
+      .section {
+        display: none;
+        animation: fadeIn 0.4s;
+      }
+      .section.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
         }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        body { display: flex; height: 100vh; background: var(--bg); color: var(--text); }
-        
-        .sidebar { width: var(--sidebar-width); background: var(--primary); color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { margin-bottom: 30px; font-size: 1.4rem; border-bottom: 1px solid #ffffff30; padding-bottom: 10px; }
-        .nav-item { padding: 12px; margin: 5px 0; cursor: pointer; border-radius: 6px; transition: 0.2s; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); }
-        
-        .main { flex: 1; padding: 30px; overflow-y: auto; }
-        .section { display: none; animation: fadeIn 0.4s; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .card h3 { font-size: 2rem; color: var(--accent); margin-bottom: 5px; }
-        
-        .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; }
-        th { background: #f8f9fa; font-weight: 600; color: var(--primary); }
-        
-        .form-box { background: white; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid var(--accent); }
-        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .form-group { flex: 1; margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        textarea.form-control { resize: vertical; height: 80px; }
-        
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; color: white; display: inline-block; margin-right: 5px; }
-        .btn-primary { background: var(--accent); }
-        .btn-success { background: #27ae60; }
-        .btn-danger { background: #e74c3c; }
-        .btn-warning { background: #f39c12; color: white; }
-        
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; color: white; display: inline-block; }
-        .bg-success { background: #2ecc71; }
-        .bg-danger { background: #e74c3c; }
-        .bg-dark { background: #34495e; }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .card h3 {
+        font-size: 2rem;
+        color: var(--accent);
+        margin-bottom: 5px;
+      }
+
+      .table-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        overflow-x: auto;
+        margin-bottom: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        white-space: nowrap;
+      }
+      th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      .form-box {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border-left: 5px solid var(--accent);
+      }
+      .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+      .form-group {
+        flex: 1;
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+      .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      textarea.form-control {
+        resize: vertical;
+        height: 80px;
+      }
+
+      .btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        color: white;
+        display: inline-block;
+        margin-right: 5px;
+      }
+      .btn-primary {
+        background: var(--accent);
+      }
+      .btn-success {
+        background: #27ae60;
+      }
+      .btn-danger {
+        background: #e74c3c;
+      }
+      .btn-warning {
+        background: #f39c12;
+        color: white;
+      }
+
+      .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: white;
+        display: inline-block;
+      }
+      .bg-success {
+        background: #2ecc71;
+      }
+      .bg-danger {
+        background: #e74c3c;
+      }
+      .bg-dark {
+        background: #34495e;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="sidebar">
-        <h2>Perpustakaan</h2>
-        <div class="nav-item active" onclick="nav('dashboard')">Dashboard</div>
-        <div class="nav-item" onclick="nav('anggota')">Data Customer</div>
-        <div class="nav-item" onclick="nav('buku')">Data Buku</div>
-        <div class="nav-item" onclick="nav('transaksi')">Sirkulasi (Pinjam)</div>
-        <div class="nav-item" onclick="nav('laporan')">Riwayat & Denda</div>
+      <h2>Perpustakaan</h2>
+      <div class="nav-item active" onclick="nav('dashboard')">Dashboard</div>
+      <div class="nav-item" onclick="nav('anggota')">Data Customer</div>
+      <div class="nav-item" onclick="nav('buku')">Data Buku</div>
+      <div class="nav-item" onclick="nav('transaksi')">Peminjaman</div>
+      <div class="nav-item" onclick="nav('laporan')">
+        Riwayat & Pengembalian
+      </div>
     </div>
 
     <div class="main">
-        
-        <section id="dashboard" class="section active">
-            <h1>Dashboard Eksekutif</h1>
-            <div class="card-grid">
-                <div class="card">
-                    <h3 id="dash-total-anggota">0</h3>
-                    <p>Total Customer</p>
-                </div>
-                <div class="card">
-                    <h3 id="dash-total-buku">0</h3>
-                    <p>Total Judul Buku</p>
-                </div>
-                <div class="card">
-                    <h3 id="dash-total-denda">Rp 0</h3>
-                    <p>Potensi Denda (SUM)</p>
-                </div>
+      <section id="dashboard" class="section active">
+        <h1>Dashboard Eksekutif</h1>
+        <div class="card-grid">
+          <div class="card">
+            <h3 id="dash-total-anggota">0</h3>
+            <p>Total Customer</p>
+          </div>
+          <div class="card">
+            <h3 id="dash-total-buku">0</h3>
+            <p>Total Judul Buku</p>
+          </div>
+          <div class="card">
+            <h3 id="dash-total-denda">Rp 0</h3>
+            <p>Total Denda (SUM)</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <h3>Statistik Koleksi (GROUP BY Kategori)</h3>
+          <p style="color: #666; font-size: 0.9em; margin-bottom: 10px"></p>
+          <table>
+            <thead>
+              <tr>
+                <th>Nama Kategori</th>
+                <th>Jumlah Judul</th>
+                <th>Grafik</th>
+              </tr>
+            </thead>
+            <tbody id="table-kategori-stats"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="anggota" class="section">
+        <h1>Data Customer</h1>
+        <div class="form-box" style="border-left-color: #9b59b6">
+          <h3>Registrasi Customer Baru</h3>
+          <form onsubmit="simpanAnggota(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nama Depan</label>
+                <input
+                  type="text"
+                  id="cust-depan"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Nama Belakang</label>
+                <input
+                  type="text"
+                  id="cust-belakang"
+                  class="form-control"
+                  required
+                />
+              </div>
             </div>
-        </section>
 
-        <section id="anggota" class="section">
-            <h1>Data Customer</h1>
-            <div class="form-box" style="border-left-color: #9b59b6;">
-                <h3>Registrasi Customer Baru</h3>
-                <form onsubmit="simpanAnggota(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nama Depan</label>
-                            <input type="text" id="cust-depan" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Nama Belakang</label>
-                            <input type="text" id="cust-belakang" class="form-control" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="cust-email" class="form-control" placeholder="contoh@email.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label>No. HP</label>
-                            <input type="text" id="cust-hp" class="form-control" placeholder="08..." required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Alamat Lengkap</label>
-                        <textarea id="cust-alamat" class="form-control" required></textarea>
-                    </div>
-
-                    <button class="btn btn-primary" style="background-color: #9b59b6;">Simpan Customer</button>
-                </form>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  id="cust-email"
+                  class="form-control"
+                  placeholder="contoh@email.com"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>No. HP</label>
+                <input
+                  type="text"
+                  id="cust-hp"
+                  class="form-control"
+                  placeholder="08..."
+                  required
+                />
+              </div>
             </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nama Lengkap</th>
-                            <th>Email</th>
-                            <th>No HP</th>
-                            <th>Alamat</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-anggota"></tbody>
-                </table>
+
+            <div class="form-group">
+              <label>Alamat Lengkap</label>
+              <textarea
+                id="cust-alamat"
+                class="form-control"
+                required
+              ></textarea>
             </div>
-        </section>
 
-        <section id="buku" class="section">
-            <h1>Data Buku</h1>
-            <div class="form-box">
-                <h3 id="form-buku-title">Tambah Buku Baru</h3>
-                <form onsubmit="simpanBuku(event)">
-                    <input type="hidden" id="buku-id">
-                    
-                    <div class="form-group">
-                        <label>Judul Buku</label>
-                        <input type="text" id="buku-judul" class="form-control" required>
-                    </div>
+            <button class="btn btn-primary" style="background-color: #9b59b6">
+              Simpan Customer
+            </button>
+          </form>
+        </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Penerbit</label>
-                            <input type="text" id="buku-penerbit" class="form-control" placeholder="Nama Penerbit" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Tahun Terbit</label>
-                            <input type="number" id="buku-tahun" class="form-control" placeholder="2023" required>
-                        </div>
-                    </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nama Lengkap</th>
+                <th>Email</th>
+                <th>No HP</th>
+                <th>Alamat</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="table-anggota"></tbody>
+          </table>
+        </div>
+      </section>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Penulis</label>
-                            <input type="text" id="buku-penulis" class="form-control" placeholder="Nama Penulis" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Kategori</label>
-                            <select id="buku-kategori" class="form-control">
-                                <option>Teknologi</option>
-                                <option>Sains</option>
-                                <option>Fiksi</option>
-                                <option>Sejarah</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Stok</label>
-                            <input type="number" id="buku-stok" class="form-control" min="1" required>
-                        </div>
-                    </div>
+      <section id="buku" class="section">
+        <h1>Data Buku</h1>
+        <div class="form-box">
+          <h3 id="form-buku-title">Tambah Buku Baru</h3>
+          <form onsubmit="simpanBuku(event)">
+            <input type="hidden" id="buku-id" />
 
-                    <button id="btn-buku-submit" class="btn btn-primary">Simpan Buku</button>
-                    <button type="button" id="btn-buku-cancel" class="btn btn-danger" style="display:none;" onclick="resetFormBuku()">Batal</button>
-                </form>
+            <div class="form-group">
+              <label>Judul Buku</label>
+              <input
+                type="text"
+                id="buku-judul"
+                class="form-control"
+                required
+              />
             </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Judul</th>
-                            <th>Penerbit (Thn)</th>
-                            <th>Penulis</th>
-                            <th>Stok</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-buku"></tbody>
-                </table>
-            </div>
-        </section>
 
-        <section id="transaksi" class="section">
-            <h1>Sirkulasi Peminjaman</h1>
-            <div class="form-box" style="border-left-color: #27ae60;">
-                <h3>Form Peminjaman</h3>
-                <form onsubmit="prosesPinjam(event)">
-                    <div class="form-group">
-                        <label>Nama Customer</label>
-                        <select id="trx-user" class="form-control"></select> 
-                    </div>
-                    <div class="form-group">
-                        <label>Pilih Buku</label>
-                        <select id="trx-buku" class="form-control"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tanggal Pinjam</label>
-                        <input type="date" id="trx-date" class="form-control" required>
-                    </div>
-                    <button class="btn btn-success">Proses Transaksi</button>
-                </form>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Penerbit</label>
+                <input
+                  type="text"
+                  id="buku-penerbit"
+                  class="form-control"
+                  placeholder="Nama Penerbit"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Tahun Terbit</label>
+                <input
+                  type="number"
+                  id="buku-tahun"
+                  class="form-control"
+                  placeholder="2023"
+                  required
+                />
+              </div>
             </div>
-        </section>
 
-        <section id="laporan" class="section">
-            <h1>Riwayat & Pengembalian</h1>
-            <div class="table-container">
-                <h3>Daftar Transaksi</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Customer</th>
-                            <th>Buku</th>
-                            <th>Tenggat</th>
-                            <th>Status / Denda</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-laporan"></tbody>
-                </table>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Penulis</label>
+                <input
+                  type="text"
+                  id="buku-penulis"
+                  class="form-control"
+                  placeholder="Nama Penulis"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Kategori</label>
+                <select id="buku-kategori" class="form-control">
+                  <option>Teknologi</option>
+                  <option>Sains</option>
+                  <option>Fiksi</option>
+                  <option>Sejarah</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Stok</label>
+                <input
+                  type="number"
+                  id="buku-stok"
+                  class="form-control"
+                  min="1"
+                  required
+                />
+              </div>
             </div>
-        </section>
 
+            <button id="btn-buku-submit" class="btn btn-primary">
+              Simpan Buku
+            </button>
+            <button
+              type="button"
+              id="btn-buku-cancel"
+              class="btn btn-danger"
+              style="display: none"
+              onclick="resetFormBuku()"
+            >
+              Batal
+            </button>
+          </form>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Judul</th>
+                <th>Penerbit (Thn)</th>
+                <th>Penulis</th>
+                <th>Stok</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="table-buku"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="transaksi" class="section">
+        <h1>Peminjaman</h1>
+        <div class="form-box" style="border-left-color: #27ae60">
+          <h3>Form Peminjaman</h3>
+          <form onsubmit="prosesPinjam(event)">
+            <div class="form-group">
+              <label>Nama Customer</label>
+              <select id="trx-user" class="form-control"></select>
+            </div>
+            <div class="form-group">
+              <label>Pilih Buku</label>
+              <select id="trx-buku" class="form-control"></select>
+            </div>
+            <div class="form-group">
+              <label>Tanggal Pinjam</label>
+              <input type="date" id="trx-date" class="form-control" required />
+            </div>
+            <button class="btn btn-success">Proses Transaksi</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="laporan" class="section">
+        <h1>Riwayat & Pengembalian</h1>
+        <div class="table-container">
+          <h3>Daftar Transaksi</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Buku</th>
+                <th>Tgl Pinjam</th>
+                <th>Tenggat</th>
+                <th>Status / Denda</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="table-laporan"></tbody>
+          </table>
+        </div>
+      </section>
     </div>
 
     <script>
-        // --- DATABASE DUMMY (Sesuai Kolom DB) ---
-        
-        let dbCustomer = [
-            { id: 1, depan: "Andi", belakang: "Saputra", email: "andi@gmail.com", hp: "0812345678", alamat: "Jl. Merdeka No. 1" },
-            { id: 2, depan: "Budi", belakang: "Santoso", email: "budi@yahoo.com", hp: "0898765432", alamat: "Jl. Sudirman No. 45" }
-        ];
+      // --- DATABASE DUMMY (Sesuai Kolom DB) ---
 
-        let dbBuku = [
-            { id: 1, judul: "Belajar SQL Dasar", penerbit: "Informatika", tahun: 2023, penulis: "Rinaldi Munir", kategori: "Teknologi", stok: 5 },
-            { id: 2, judul: "Laskar Pelangi", penerbit: "Bentang Pustaka", tahun: 2005, penulis: "Andrea Hirata", kategori: "Fiksi", stok: 3 }
-        ];
+      let dbCustomer = [
+        {
+          id: 1,
+          depan: "Andi",
+          belakang: "Saputra",
+          email: "andi@gmail.com",
+          hp: "0812345678",
+          alamat: "Jl. Merdeka No. 1",
+        },
+        {
+          id: 2,
+          depan: "Budi",
+          belakang: "Santoso",
+          email: "budi@yahoo.com",
+          hp: "0898765432",
+          alamat: "Jl. Sudirman No. 45",
+        },
+      ];
 
-        let dbTransaksi = [];
-        let editBukuId = null;
+      let dbBuku = [
+        {
+          id: 1,
+          judul: "Belajar SQL Dasar",
+          penerbit: "Informatika",
+          tahun: 2023,
+          penulis: "Rinaldi Munir",
+          kategori: "Teknologi",
+          stok: 5,
+        },
+        {
+          id: 2,
+          judul: "Laskar Pelangi",
+          penerbit: "Bentang Pustaka",
+          tahun: 2005,
+          penulis: "Andrea Hirata",
+          kategori: "Fiksi",
+          stok: 3,
+        },
+        {
+          id: 3,
+          judul: "Fisika Dasar",
+          penerbit: "Erlangga",
+          tahun: 2020,
+          penulis: "Halliday",
+          kategori: "Sains",
+          stok: 4,
+        },
+      ];
 
-        // --- NAVIGASI ---
-        function nav(sectionId) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            event.currentTarget.classList.add('active');
-            renderAll();
+      let dbTransaksi = [];
+      let editBukuId = null;
+
+      // --- NAVIGASI ---
+      function nav(sectionId) {
+        document
+          .querySelectorAll(".section")
+          .forEach((s) => s.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        document.getElementById(sectionId).classList.add("active");
+        event.currentTarget.classList.add("active");
+        renderAll();
+      }
+
+      // --- LOGIC CUSTOMER (ANGGOTA) ---
+      function simpanAnggota(e) {
+        e.preventDefault();
+        const depan = document.getElementById("cust-depan").value;
+        const belakang = document.getElementById("cust-belakang").value;
+        const email = document.getElementById("cust-email").value;
+        const hp = document.getElementById("cust-hp").value;
+        const alamat = document.getElementById("cust-alamat").value;
+
+        dbCustomer.push({
+          id: dbCustomer.length + 1,
+          depan,
+          belakang,
+          email,
+          hp,
+          alamat,
+        });
+
+        alert("Customer berhasil disimpan!");
+        e.target.reset();
+        renderAll();
+      }
+
+      function hapusAnggota(id) {
+        if (confirm("Hapus customer ini?")) {
+          dbCustomer = dbCustomer.filter((c) => c.id !== id);
+          renderAll();
         }
+      }
 
-        // --- LOGIC CUSTOMER (ANGGOTA) ---
-        function simpanAnggota(e) {
-            e.preventDefault();
-            const depan = document.getElementById('cust-depan').value;
-            const belakang = document.getElementById('cust-belakang').value;
-            const email = document.getElementById('cust-email').value;
-            const hp = document.getElementById('cust-hp').value;
-            const alamat = document.getElementById('cust-alamat').value;
+      // --- LOGIC BUKU (MASTER) ---
+      function simpanBuku(e) {
+        e.preventDefault();
+        const judul = document.getElementById("buku-judul").value.trim();
+        const penerbit = document.getElementById("buku-penerbit").value;
+        const tahun = document.getElementById("buku-tahun").value;
+        const penulis = document.getElementById("buku-penulis").value;
+        const kategori = document.getElementById("buku-kategori").value;
+        const stok = parseInt(document.getElementById("buku-stok").value);
 
-            dbCustomer.push({
-                id: dbCustomer.length + 1,
-                depan, belakang, email, hp, alamat
+        if (editBukuId) {
+          // EDIT
+          const idx = dbBuku.findIndex((b) => b.id === editBukuId);
+          dbBuku[idx] = {
+            id: editBukuId,
+            judul,
+            penerbit,
+            tahun,
+            penulis,
+            kategori,
+            stok,
+          };
+          alert("Data buku diupdate!");
+          resetFormBuku();
+        } else {
+          // INSERT (Cek Duplikat Judul)
+          const existing = dbBuku.find(
+            (b) => b.judul.toLowerCase() === judul.toLowerCase()
+          );
+          if (existing) {
+            existing.stok += stok;
+            alert(`Buku sudah ada. Stok ditambahkan jadi ${existing.stok}.`);
+          } else {
+            dbBuku.push({
+              id: dbBuku.length + 1,
+              judul,
+              penerbit,
+              tahun,
+              penulis,
+              kategori,
+              stok,
             });
+            alert("Buku baru ditambahkan!");
+          }
+          e.target.reset();
+        }
+        renderAll();
+      }
 
-            alert("Customer berhasil disimpan!");
-            e.target.reset();
-            renderAll();
+      function editBuku(id) {
+        const b = dbBuku.find((b) => b.id === id);
+        document.getElementById("buku-id").value = b.id;
+        document.getElementById("buku-judul").value = b.judul;
+        document.getElementById("buku-penerbit").value = b.penerbit;
+        document.getElementById("buku-tahun").value = b.tahun;
+        document.getElementById("buku-penulis").value = b.penulis;
+        document.getElementById("buku-kategori").value = b.kategori;
+        document.getElementById("buku-stok").value = b.stok;
+
+        editBukuId = id;
+        document.getElementById("form-buku-title").innerText =
+          "Edit Buku ID: " + id;
+        document.getElementById("btn-buku-submit").innerText = "Update";
+        document.getElementById("btn-buku-cancel").style.display =
+          "inline-block";
+        // Scroll to form
+        document.getElementById("buku").scrollTop = 0;
+      }
+
+      function resetFormBuku() {
+        editBukuId = null;
+        document.getElementById("form-buku-title").innerText =
+          "Tambah Buku Baru";
+        document.getElementById("btn-buku-submit").innerText = "Simpan Buku";
+        document.getElementById("btn-buku-cancel").style.display = "none";
+        document.querySelector("#buku form").reset();
+      }
+
+      function hapusBuku(id) {
+        if (confirm("Hapus buku ini?")) {
+          dbBuku = dbBuku.filter((b) => b.id !== id);
+          renderAll();
+        }
+      }
+
+      // --- LOGIC TRANSAKSI (STORED PROC SIMULATION) ---
+      function prosesPinjam(e) {
+        e.preventDefault();
+        const userId = parseInt(document.getElementById("trx-user").value);
+        const bukuId = parseInt(document.getElementById("trx-buku").value);
+        const tglPinjam = document.getElementById("trx-date").value;
+
+        if (!userId || !bukuId) {
+          alert("Data tidak lengkap!");
+          return;
         }
 
-        function hapusAnggota(id) {
-            if(confirm("Hapus customer ini?")) {
-                dbCustomer = dbCustomer.filter(c => c.id !== id);
-                renderAll();
-            }
+        const cust = dbCustomer.find((c) => c.id === userId);
+        const bukuIdx = dbBuku.findIndex((b) => b.id === bukuId);
+
+        if (dbBuku[bukuIdx].stok <= 0) {
+          alert("Stok Habis!");
+          return;
         }
 
-        // --- LOGIC BUKU (MASTER) ---
-        function simpanBuku(e) {
-            e.preventDefault();
-            const judul = document.getElementById('buku-judul').value.trim();
-            const penerbit = document.getElementById('buku-penerbit').value;
-            const tahun = document.getElementById('buku-tahun').value;
-            const penulis = document.getElementById('buku-penulis').value;
-            const kategori = document.getElementById('buku-kategori').value;
-            const stok = parseInt(document.getElementById('buku-stok').value);
+        // Hitung Tenggat (+7 Hari)
+        let tgl = new Date(tglPinjam);
+        tgl.setDate(tgl.getDate() + 7);
 
-            if (editBukuId) {
-                // EDIT
-                const idx = dbBuku.findIndex(b => b.id === editBukuId);
-                dbBuku[idx] = { id: editBukuId, judul, penerbit, tahun, penulis, kategori, stok };
-                alert("Data buku diupdate!");
-                resetFormBuku();
-            } else {
-                // INSERT (Cek Duplikat Judul)
-                const existing = dbBuku.find(b => b.judul.toLowerCase() === judul.toLowerCase());
-                if (existing) {
-                    existing.stok += stok;
-                    alert(`Buku sudah ada. Stok ditambahkan jadi ${existing.stok}.`);
-                } else {
-                    dbBuku.push({ id: dbBuku.length + 1, judul, penerbit, tahun, penulis, kategori, stok });
-                    alert("Buku baru ditambahkan!");
-                }
-                e.target.reset();
-            }
-            renderAll();
-        }
+        dbTransaksi.push({
+          id: dbTransaksi.length + 1,
+          userId: userId,
+          namaLengkap: `${cust.depan} ${cust.belakang}`, // Snapshot nama
+          bukuId: bukuId,
+          tglPinjam: tglPinjam,
+          tglTenggat: tgl.toISOString().split("T")[0],
+          status: "Dipinjam",
+          denda: 0,
+          ket: "-",
+        });
 
-        function editBuku(id) {
-            const b = dbBuku.find(b => b.id === id);
-            document.getElementById('buku-id').value = b.id;
-            document.getElementById('buku-judul').value = b.judul;
-            document.getElementById('buku-penerbit').value = b.penerbit;
-            document.getElementById('buku-tahun').value = b.tahun;
-            document.getElementById('buku-penulis').value = b.penulis;
-            document.getElementById('buku-kategori').value = b.kategori;
-            document.getElementById('buku-stok').value = b.stok;
+        dbBuku[bukuIdx].stok -= 1; // Kurangi Stok
+        alert("Peminjaman Berhasil!");
+        renderAll();
+        nav("laporan");
+      }
 
-            editBukuId = id;
-            document.getElementById('form-buku-title').innerText = "Edit Buku ID: " + id;
-            document.getElementById('btn-buku-submit').innerText = "Update";
-            document.getElementById('btn-buku-cancel').style.display = "inline-block";
-            // Scroll to form
-            document.getElementById('buku').scrollTop = 0;
-        }
+      function kembalikanBuku(trxId) {
+        let tglKembali = prompt(
+          "Tgl Kembali (YYYY-MM-DD):",
+          new Date().toISOString().split("T")[0]
+        );
+        if (!tglKembali) return;
 
-        function resetFormBuku() {
-            editBukuId = null;
-            document.getElementById('form-buku-title').innerText = "Tambah Buku Baru";
-            document.getElementById('btn-buku-submit').innerText = "Simpan Buku";
-            document.getElementById('btn-buku-cancel').style.display = "none";
-            document.querySelector('#buku form').reset();
-        }
+        const idx = dbTransaksi.findIndex((t) => t.id === trxId);
+        const trx = dbTransaksi[idx];
 
-        function hapusBuku(id) {
-            if(confirm("Hapus buku ini?")) {
-                dbBuku = dbBuku.filter(b => b.id !== id);
-                renderAll();
-            }
-        }
+        // Logic Denda
+        const diffDays = Math.ceil(
+          (new Date(tglKembali) - new Date(trx.tglTenggat)) / (1000 * 3600 * 24)
+        );
+        let denda = diffDays > 0 ? diffDays * 50000 : 0;
 
-        // --- LOGIC TRANSAKSI (STORED PROC SIMULATION) ---
-        function prosesPinjam(e) {
-            e.preventDefault();
-            const userId = parseInt(document.getElementById('trx-user').value);
-            const bukuId = parseInt(document.getElementById('trx-buku').value);
-            const tglPinjam = document.getElementById('trx-date').value;
+        // Logic Case When Status
+        let statusKet = "Bebas Denda";
+        if (denda > 50000) statusKet = "Pelanggaran Berat";
+        else if (denda > 0) statusKet = "Pelanggaran Ringan";
 
-            if(!userId || !bukuId) { alert("Data tidak lengkap!"); return; }
+        dbTransaksi[idx].denda = denda;
+        dbTransaksi[idx].status = "Dikembalikan";
+        dbTransaksi[idx].ket = statusKet;
 
-            const cust = dbCustomer.find(c => c.id === userId);
-            const bukuIdx = dbBuku.findIndex(b => b.id === bukuId);
+        // Balikin Stok
+        const bukuIdx = dbBuku.findIndex((b) => b.id === trx.bukuId);
+        if (bukuIdx !== -1) dbBuku[bukuIdx].stok += 1;
 
-            if(dbBuku[bukuIdx].stok <= 0) { alert("Stok Habis!"); return; }
+        renderAll();
+      }
 
-            // Hitung Tenggat (+7 Hari)
-            let tgl = new Date(tglPinjam);
-            tgl.setDate(tgl.getDate() + 7);
+      // --- RENDER UI ---
+      function renderAll() {
+        // 1. Render Customer
+        const tbodyCust = document.getElementById("table-anggota");
+        const selectUser = document.getElementById("trx-user");
+        tbodyCust.innerHTML = "";
+        selectUser.innerHTML = "";
 
-            dbTransaksi.push({
-                id: dbTransaksi.length + 1,
-                userId: userId,
-                namaLengkap: `${cust.depan} ${cust.belakang}`, // Snapshot nama
-                bukuId: bukuId,
-                tglPinjam: tglPinjam,
-                tglTenggat: tgl.toISOString().split('T')[0],
-                status: 'Dipinjam',
-                denda: 0,
-                ket: '-'
-            });
-
-            dbBuku[bukuIdx].stok -= 1; // Kurangi Stok
-            alert("Peminjaman Berhasil!");
-            renderAll();
-            nav('laporan');
-        }
-
-        function kembalikanBuku(trxId) {
-            let tglKembali = prompt("Tgl Kembali (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-            if(!tglKembali) return;
-
-            const idx = dbTransaksi.findIndex(t => t.id === trxId);
-            const trx = dbTransaksi[idx];
-            
-            // Logic Denda
-            const diffDays = Math.ceil((new Date(tglKembali) - new Date(trx.tglTenggat)) / (1000 * 3600 * 24));
-            let denda = diffDays > 0 ? diffDays * 50000 : 0;
-            
-            // Logic Case When Status
-            let statusKet = 'Bebas Denda';
-            if (denda > 50000) statusKet = 'Pelanggaran Berat';
-            else if (denda > 0) statusKet = 'Pelanggaran Ringan';
-
-            dbTransaksi[idx].denda = denda;
-            dbTransaksi[idx].status = 'Dikembalikan';
-            dbTransaksi[idx].ket = statusKet;
-
-            // Balikin Stok
-            const bukuIdx = dbBuku.findIndex(b => b.id === trx.bukuId);
-            if(bukuIdx !== -1) dbBuku[bukuIdx].stok += 1;
-
-            renderAll();
-        }
-
-        // --- RENDER UI ---
-        function renderAll() {
-            // 1. Render Customer
-            const tbodyCust = document.getElementById('table-anggota');
-            const selectUser = document.getElementById('trx-user');
-            tbodyCust.innerHTML = '';
-            selectUser.innerHTML = '';
-
-            dbCustomer.forEach(c => {
-                const fullName = `${c.depan} ${c.belakang}`;
-                tbodyCust.innerHTML += `<tr>
+        dbCustomer.forEach((c) => {
+          const fullName = `${c.depan} ${c.belakang}`;
+          tbodyCust.innerHTML += `<tr>
                     <td>${c.id}</td>
                     <td>${fullName}</td>
                     <td>${c.email}</td>
@@ -442,20 +743,21 @@
                     <td><small>${c.alamat}</small></td>
                     <td><button class="btn btn-danger" style="font-size:0.7rem" onclick="hapusAnggota(${c.id})">Hapus</button></td>
                 </tr>`;
-                
-                selectUser.innerHTML += `<option value="${c.id}">${fullName} (ID: ${c.id})</option>`;
-            });
 
-            // 2. Render Buku
-            const tbodyBuku = document.getElementById('table-buku');
-            const selectBuku = document.getElementById('trx-buku');
-            tbodyBuku.innerHTML = '';
-            selectBuku.innerHTML = '';
-            
-            let totalStok = 0;
+          selectUser.innerHTML += `<option value="${c.id}">${fullName} (ID: ${c.id})</option>`;
+        });
 
-            dbBuku.forEach(b => {
-                tbodyBuku.innerHTML += `<tr>
+        // 2. Render Buku
+        const tbodyBuku = document.getElementById("table-buku");
+        const selectBuku = document.getElementById("trx-buku");
+        tbodyBuku.innerHTML = "";
+        selectBuku.innerHTML = "";
+
+        let totalStok = 0;
+        let kategoriCount = {}; // Untuk Stats Kategori (Request No. 2)
+
+        dbBuku.forEach((b) => {
+          tbodyBuku.innerHTML += `<tr>
                     <td>${b.id}</td>
                     <td>${b.judul}<br><small style="color:#666">${b.kategori}</small></td>
                     <td>${b.penerbit} (${b.tahun})</td>
@@ -466,47 +768,83 @@
                         <button class="btn btn-danger" style="font-size:0.7rem" onclick="hapusBuku(${b.id})">Hapus</button>
                     </td>
                 </tr>`;
-                
-                if(b.stok > 0) {
-                    selectBuku.innerHTML += `<option value="${b.id}">${b.judul}</option>`;
-                }
-                totalStok += b.stok;
-            });
 
-            // 3. Render Laporan
-            const tbodyLap = document.getElementById('table-laporan');
-            tbodyLap.innerHTML = '';
-            let totalDenda = 0;
+          if (b.stok > 0) {
+            selectBuku.innerHTML += `<option value="${b.id}">${b.judul}</option>`;
+          }
+          totalStok += b.stok;
 
-            dbTransaksi.forEach(trx => {
-                const buku = dbBuku.find(b => b.id === trx.bukuId);
-                const judulBuku = buku ? buku.judul : "(Buku Dihapus)";
+          // Hitung Statistik per Kategori (GROUP BY Logic)
+          if (kategoriCount[b.kategori]) {
+            kategoriCount[b.kategori]++;
+          } else {
+            kategoriCount[b.kategori] = 1;
+          }
+        });
 
-                let badge = trx.status === 'Dipinjam' ? 'bg-dark' : (trx.ket.includes('Berat') ? 'bg-danger' : 'bg-success');
-                let statusText = trx.status === 'Dipinjam' ? 'Sedang Dipinjam' : `${trx.ket}<br>Denda: ${trx.denda.toLocaleString()}`;
-                let btn = trx.status === 'Dipinjam' ? `<button class="btn btn-primary" onclick="kembalikanBuku(${trx.id})">Kembali</button>` : '-';
+        // 3. Render Laporan
+        const tbodyLap = document.getElementById("table-laporan");
+        tbodyLap.innerHTML = "";
+        let totalDenda = 0;
 
-                tbodyLap.innerHTML += `<tr>
+        dbTransaksi.forEach((trx) => {
+          const buku = dbBuku.find((b) => b.id === trx.bukuId);
+          const judulBuku = buku ? buku.judul : "(Buku Dihapus)";
+
+          let badge =
+            trx.status === "Dipinjam"
+              ? "bg-dark"
+              : trx.ket.includes("Berat")
+              ? "bg-danger"
+              : "bg-success";
+          let statusText =
+            trx.status === "Dipinjam"
+              ? "Sedang Dipinjam"
+              : `${trx.ket}<br>Denda: ${trx.denda.toLocaleString()}`;
+          let btn =
+            trx.status === "Dipinjam"
+              ? `<button class="btn btn-primary" onclick="kembalikanBuku(${trx.id})">Kembali</button>`
+              : "-";
+
+          tbodyLap.innerHTML += `<tr>
                     <td>TRX-${trx.id}</td>
                     <td>${trx.namaLengkap}</td>
                     <td>${judulBuku}</td>
-                    <td>${trx.tglTenggat}</td>
+                    <td>${trx.tglPinjam}</td> <td>${trx.tglTenggat}</td>
                     <td><span class="badge ${badge}">${statusText}</span></td>
                     <td>${btn}</td>
                 </tr>`;
-                totalDenda += trx.denda;
-            });
+          totalDenda += trx.denda;
+        });
 
-            // 4. Update Dashboard Stats
-            document.getElementById('dash-total-anggota').innerText = dbCustomer.length;
-            document.getElementById('dash-total-buku').innerText = dbBuku.length;
-            document.getElementById('dash-total-denda').innerText = "Rp " + totalDenda.toLocaleString();
+        // 4. Update Dashboard Stats
+        document.getElementById("dash-total-anggota").innerText =
+          dbCustomer.length;
+        document.getElementById("dash-total-buku").innerText = dbBuku.length;
+        document.getElementById("dash-total-denda").innerText =
+          "Rp " + totalDenda.toLocaleString();
+
+        // 5. Render Statistik Kategori (Request No. 2)
+        const tbodyStats = document.getElementById("table-kategori-stats");
+        tbodyStats.innerHTML = "";
+
+        for (let [kategori, count] of Object.entries(kategoriCount)) {
+          let percentage = (count / dbBuku.length) * 100;
+          tbodyStats.innerHTML += `<tr>
+                    <td>${kategori}</td>
+                    <td>${count} Judul</td>
+                    <td>
+                        <div style="background:#ddd; width:100px; height:6px; border-radius:3px;">
+                            <div style="background:var(--accent); width:${percentage}%; height:100%; border-radius:3px;"></div>
+                        </div>
+                    </td>
+                </tr>`;
         }
+      }
 
-        // Init
-        document.getElementById('trx-date').valueAsDate = new Date();
-        renderAll();
-
+      // Init
+      document.getElementById("trx-date").valueAsDate = new Date();
+      renderAll();
     </script>
-</body>
+  </body>
 </html>
