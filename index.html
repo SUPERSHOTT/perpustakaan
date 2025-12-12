@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sistem Perpustakaan V4 (Schema Matched)</title>
+    <title>Sistem Perpustakaan V5 (With Smart Reco)</title>
     <style>
       :root {
         --primary: #2c3e50;
@@ -208,6 +208,7 @@
     <div class="main">
       <section id="dashboard" class="section active">
         <h1>Dashboard Eksekutif</h1>
+        
         <div class="card-grid">
           <div class="card">
             <h3 id="dash-total-anggota">0</h3>
@@ -223,6 +224,26 @@
           </div>
         </div>
 
+        <div class="form-box" style="border-left-color: #f39c12;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap:10px;">
+              <h3>📚 Rekomendasi Pintar (Smart Suggestion)</h3>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <small><strong>Simulasi Login sebagai:</strong></small>
+                <select id="dash-simul-user" class="form-control" style="width: 200px; padding: 5px;" onchange="renderRekomendasi()">
+                  </select>
+              </div>
+            </div>
+            
+            <p style="margin: 10px 0; color: #666; font-size: 0.9rem;">
+              Fitur ini menyimulasikan "Logika Rekomendasi" di Laporan. Sistem akan menganalisis kategori yang sering dipinjam user, lalu menyarankan buku lain di kategori yang sama.
+            </p>
+          
+            <div id="rekomendasi-container" class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 20px; margin-bottom: 0;">
+                <div style="grid-column: 1/-1; color: #999; text-align: center; padding: 20px;">
+                    Silakan pilih user di pojok kanan atas untuk melihat rekomendasi.
+                 </div>
+            </div>
+        </div>
         <div class="table-container">
           <h3>Statistik Koleksi (GROUP BY Kategori)</h3>
           <p style="color: #666; font-size: 0.9em; margin-bottom: 10px"></p>
@@ -518,6 +539,16 @@
           kategori: "Sains",
           stok: 4,
         },
+        // TAMBAHAN DATA UNTUK TEST REKOMENDASI (Supaya ada 2 buku Teknologi)
+        {
+          id: 4,
+          judul: "Algoritma & Pemrograman",
+          penerbit: "Informatika",
+          tahun: 2021,
+          penulis: "Rinaldi Munir",
+          kategori: "Teknologi",
+          stok: 5,
+        }
       ];
 
       let dbTransaksi = [];
@@ -532,7 +563,7 @@
           .querySelectorAll(".nav-item")
           .forEach((n) => n.classList.remove("active"));
         document.getElementById(sectionId).classList.add("active");
-        event.currentTarget.classList.add("active");
+        event.currentTarget.classList.add("active"); // Highlight menu active
         renderAll();
       }
 
@@ -718,16 +749,13 @@
         dbTransaksi[idx].status = "Dikembalikan";
         dbTransaksi[idx].ket = statusKet;
 
-        // Balikin Stok
         const bukuIdx = dbBuku.findIndex((b) => b.id === trx.bukuId);
         if (bukuIdx !== -1) dbBuku[bukuIdx].stok += 1;
 
         renderAll();
       }
 
-      // --- RENDER UI ---
       function renderAll() {
-        // 1. Render Customer
         const tbodyCust = document.getElementById("table-anggota");
         const selectUser = document.getElementById("trx-user");
         tbodyCust.innerHTML = "";
@@ -747,14 +775,13 @@
           selectUser.innerHTML += `<option value="${c.id}">${fullName} (ID: ${c.id})</option>`;
         });
 
-        // 2. Render Buku
         const tbodyBuku = document.getElementById("table-buku");
         const selectBuku = document.getElementById("trx-buku");
         tbodyBuku.innerHTML = "";
         selectBuku.innerHTML = "";
 
         let totalStok = 0;
-        let kategoriCount = {}; // Untuk Stats Kategori (Request No. 2)
+        let kategoriCount = {};
 
         dbBuku.forEach((b) => {
           tbodyBuku.innerHTML += `<tr>
@@ -774,7 +801,6 @@
           }
           totalStok += b.stok;
 
-          // Hitung Statistik per Kategori (GROUP BY Logic)
           if (kategoriCount[b.kategori]) {
             kategoriCount[b.kategori]++;
           } else {
@@ -782,7 +808,6 @@
           }
         });
 
-        // 3. Render Laporan
         const tbodyLap = document.getElementById("table-laporan");
         tbodyLap.innerHTML = "";
         let totalDenda = 0;
@@ -817,14 +842,12 @@
           totalDenda += trx.denda;
         });
 
-        // 4. Update Dashboard Stats
         document.getElementById("dash-total-anggota").innerText =
           dbCustomer.length;
         document.getElementById("dash-total-buku").innerText = dbBuku.length;
         document.getElementById("dash-total-denda").innerText =
           "Rp " + totalDenda.toLocaleString();
 
-        // 5. Render Statistik Kategori (Request No. 2)
         const tbodyStats = document.getElementById("table-kategori-stats");
         tbodyStats.innerHTML = "";
 
@@ -840,9 +863,86 @@
                     </td>
                 </tr>`;
         }
+
+        const selectDashUser = document.getElementById("dash-simul-user");
+        const currentVal = selectDashUser.value; 
+        
+        selectDashUser.innerHTML = '<option value="">-- Pilih Simulasi User --</option>';
+        dbCustomer.forEach(c => {
+            selectDashUser.innerHTML += `<option value="${c.id}">${c.depan} ${c.belakang}</option>`;
+        });
+
+        if(currentVal) {
+            selectDashUser.value = currentVal;
+            renderRekomendasi(); 
+        }
       }
 
-      // Init
+      function renderRekomendasi() {
+        const userId = parseInt(document.getElementById("dash-simul-user").value);
+        const container = document.getElementById("rekomendasi-container");
+        
+        if (!userId) {
+            container.innerHTML = "<div style='grid-column: 1/-1; padding: 20px; text-align:center; color:#999;'>Silakan pilih user untuk simulasi.</div>";
+            return;
+        }
+
+        const userHistory = dbTransaksi.filter(t => t.userId === userId);
+
+        if (userHistory.length === 0) {
+            container.innerHTML = `
+            <div style="grid-column: 1/-1; padding: 20px; background: #fff3cd; border-radius: 5px; color: #856404; text-align: center;">
+                User ini belum meminjam buku apapun. <br>
+                <strong>Saran Sistem:</strong> Tampilkan buku Populer / Terbaru.
+            </div>`;
+            return;
+        }
+
+        let catCounts = {};
+        userHistory.forEach(trx => {
+            const buku = dbBuku.find(b => b.id === trx.bukuId);
+            if (buku) {
+                catCounts[buku.kategori] = (catCounts[buku.kategori] || 0) + 1;
+            }
+        });
+
+        let favCategory = Object.keys(catCounts).reduce((a, b) => catCounts[a] > catCounts[b] ? a : b);
+
+        let rekomendasi = dbBuku.filter(b => {
+            const isSameCat = b.kategori === favCategory;
+            const hasBorrowed = userHistory.some(h => h.bukuId === b.id);
+            return isSameCat && !hasBorrowed && b.stok > 0;
+        });
+
+        container.innerHTML = "";
+        
+        if (rekomendasi.length > 0) {
+            container.innerHTML += `
+            <div style="grid-column: 1/-1; margin-bottom: 10px; font-size: 0.9rem;">
+                User sering membaca kategori: <span class="badge bg-success">${favCategory}</span>
+            </div>
+            `;
+
+            rekomendasi.forEach(b => {
+            container.innerHTML += `
+                <div class="card" style="border: 1px solid #eee; padding: 15px; display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <h4 style="color:var(--accent); font-size: 1.1rem; margin-bottom:5px;">${b.judul}</h4>
+                    <small style="display:block; color:#666;">${b.penulis}</small>
+                    <span class="badge bg-dark" style="margin-top:10px;">${b.kategori}</span>
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:15px; font-size:0.8rem;" onclick="nav('transaksi')">Pinjam Sekarang</button>
+                </div>
+            `;
+            });
+        } else {
+            container.innerHTML = `
+            <div style="grid-column: 1/-1; color: #666; background:#eee; padding:20px; border-radius:8px; text-align:center;">
+                Tidak ada buku baru di kategori <strong>${favCategory}</strong> yang belum dibaca user ini.
+            </div>`;
+        }
+      }
+
       document.getElementById("trx-date").valueAsDate = new Date();
       renderAll();
     </script>
